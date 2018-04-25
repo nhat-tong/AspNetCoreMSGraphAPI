@@ -1,7 +1,15 @@
-﻿
+﻿@model Microsoft.Graph.IGraphServiceUsersCollectionPage
+
 @{
     ViewData["Title"] = "Index";
 }
 
-<h2>Index</h2>
+<h2>List users in current directory</h2>
+
+<ul>
+    @foreach (var user in Model.CurrentPage)
+    {
+        <li>@user.DisplayName, @user.Id</li>
+    }
+</ul>
 

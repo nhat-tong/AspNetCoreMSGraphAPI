@@ -1,6 +1,7 @@
 ﻿#region using
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
@@ -66,14 +67,15 @@ namespace AspNetCore.MSGraphAPI.Framework.Extensions
                 OnAuthorizationCodeReceived = async context =>
                 {
                     var authorizationCode = context.ProtocolMessage.Code;
-                    var identifier = context.Principal.FindFirstValue(Contants.ObjectIdentifierType);
+                    var identifier = context.Principal.FindFirstValue(Constants.ObjectIdentifierType);
+                    var memoryCache = context.HttpContext.RequestServices.GetService<IMemoryCache>();
                     var graphScopes = _azureOptions.GraphScopes.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
                     var cca = new ConfidentialClientApplication(
                         _azureOptions.ClientId,
                         _azureOptions.BaseUrl + _azureOptions.CallbackPath,
                         new ClientCredential(_azureOptions.ClientSecret),
-                        null,
+                        new MemoryTokenCache(identifier, memoryCache).GetCacheInstance(),
                         null);
 
                     var result = await cca.AcquireTokenByAuthorizationCodeAsync(authorizationCode, graphScopes);

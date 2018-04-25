@@ -1,5 +1,6 @@
 ﻿#region using
 using AspNetCore.MSGraphAPI.Framework.Extensions;
+using AspNetCore.MSGraphAPI.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
@@ -37,6 +38,14 @@ namespace AspNetCore.MSGraphAPI
             .AddAzureAD(options => Configuration.Bind("AzureAD", options));
 
             services.AddMvc();
+
+            // This sample uses an in-memory cache for tokens
+            services.AddMemoryCache();
+
+            services.AddSingleton<IGraphAuthProvider, GraphAuthProvider>();
+
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IGraphSdkHelper, GraphSdkHelper>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
