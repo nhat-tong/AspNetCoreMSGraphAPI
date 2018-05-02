@@ -1,6 +1,8 @@
 ﻿@model Group
 @{
     ViewData["Title"] = "Detail";
+    var userMembers = Model.Members.Where(m => m is User);
+    var groupMembers = Model.Members.Where(m => m is Group);
 }
 
 <h1>Current Group: @Model.DisplayName</h1>
@@ -32,7 +34,7 @@
 
 <hr />
 
-<h2>Members</h2>
+<h2>User Members</h2>
 
 <table class="table table-responsive table-striped">
     <thead>
@@ -43,16 +45,39 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (User member in Model.Members)
+        @foreach (User member in userMembers)
         {
-        <tr>
-            <td>@member.Id</td>
-            <td>@member.DisplayName</td>
-            <td>@member.UserPrincipalName</td>
-            <td><a asp-action="RevokeMember" asp-route-id="@member.Id" asp-route-idGroup="@Model.Id" class="btn btn-danger">Revoke</a></td>
-        </tr>
+            <tr>
+                <td>@member.Id</td>
+                <td>@member.DisplayName</td>
+                <td>@member.UserPrincipalName</td>
+                <td><a asp-action="RevokeMember" asp-route-id="@member.Id" asp-route-idGroup="@Model.Id" class="btn btn-danger">Revoke</a></td>
+            </tr>
         }
     </tbody>
 </table>
-
 <a id="AddNewMember" class="btn btn-primary" href="/Group/CreateMember?id=@Model.Id">Add New Member</a>
+
+<hr />
+
+<h2>Group Members</h2>
+
+<table class="table table-responsive table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Group member in groupMembers)
+        {
+            <tr>
+                <td>@member.Id</td>
+                <td>@member.DisplayName</td>
+                <td><a asp-action="RevokeMember" asp-route-id="@member.Id" asp-route-idGroup="@Model.Id" class="btn btn-danger">Revoke</a></td>
+            </tr>
+        }
+    </tbody>
+</table>
+<a id="AddNewGroupMember" class="btn btn-primary" href="/Group/CreateGroupMember?id=@Model.Id">Add New Group Member</a>

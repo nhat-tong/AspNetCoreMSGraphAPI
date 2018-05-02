@@ -38,4 +38,17 @@ $(function () {
             }
         });
     });
+
+    $('#AddNewGroupMember').on('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        $.ajax({
+            url: $(event.currentTarget).attr('href'),
+            method: 'GET',
+            success: function (data) {
+                $(data).modal('show');
+            }
+        });
+    });
 })

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -134,25 +135,8 @@ namespace AspNetCore.MSGraphAPI.Controllers
         public async Task<IActionResult> CreateMember(CreateMemberOrOwnerViewModel model)
         {
             GraphServiceClient client = _graphAuthProvider.GetAuthenticatedClient(UserId, _adminRestrictedGroupReadWriteScopes);
-            // Get the request URL
             var requestUrl = client.Groups[model.GroupId].Members.Request().RequestUrl + "/$ref";
-            foreach (var member in model.SelectedItems)
-            {
-                // Payload in json
-                string body = "{\"@odata.id\":\"https://graph.microsoft.com/v1.0/users/" + member + "\"}";
-
-                // Create the request message and add the content.
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUrl);
-                request.Content = new StringContent(body, Encoding.UTF8, "application/json");
-
-                // Authenticate (add access token) our HttpRequestMessage
-                await client.AuthenticationProvider.AuthenticateRequestAsync(request);
-
-                // Send the request and get the response.
-                await client.HttpProvider.SendAsync(request);
-            }
-
-            return RedirectToAction("Detail", new { id = model.GroupId });
+            return await ExecuteRequestAsync(client, requestUrl, model.GroupId, model.SelectedItems);
         }
 
         [HttpGet]
@@ -191,12 +175,60 @@ namespace AspNetCore.MSGraphAPI.Controllers
         public async Task<IActionResult> CreateOwner(CreateMemberOrOwnerViewModel model)
         {
             GraphServiceClient client = _graphAuthProvider.GetAuthenticatedClient(UserId, _adminRestrictedGroupReadWriteScopes);
-            // Get the request URL
             var requestUrl = client.Groups[model.GroupId].Owners.Request().RequestUrl + "/$ref";
-            foreach (var owner in model.SelectedItems)
+            return await ExecuteRequestAsync(client, requestUrl, model.GroupId, model.SelectedItems);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> RevokeOwner(string id, string idGroup)
+        {
+            GraphServiceClient client = _graphAuthProvider.GetAuthenticatedClient(UserId, _adminRestrictedGroupReadWriteScopes);
+            var requestUrl = client.Groups[idGroup].Owners[id].Request().RequestUrl + "/$ref";
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, requestUrl);
+            await client.AuthenticationProvider.AuthenticateRequestAsync(request);
+            await client.HttpProvider.SendAsync(request);
+
+            return RedirectToAction("Detail", new { id = idGroup });
+        }
+        #endregion
+
+        #region Group Member
+        [HttpGet]
+        public async Task<IActionResult> CreateGroupMember(string id)
+        {
+            var client = _graphAuthProvider.GetAuthenticatedClient(UserId, _adminRestrictedGroupReadScopes);
+            var groups = await client.Groups.Request().GetAsync();
+            var members = await client.Groups[id].Members.Request().GetAsync();
+
+            var excludeGroups = new List<string> { id };
+            excludeGroups.AddRange(members.Where(m => m is Group).Select(x => x.Id));
+
+            return PartialView("_FormCreationGroupMember", new CreateGroupMemberViewModel {
+                GroupId = id,
+                GroupListItem = groups.Where(g => !excludeGroups.Contains(g.Id)).Select(g => new SelectListItem
+                {
+                    Text = g.DisplayName,
+                    Value = g.Id
+                })
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateGroupMember(CreateGroupMemberViewModel model)
+        {
+            GraphServiceClient client = _graphAuthProvider.GetAuthenticatedClient(UserId, _adminRestrictedGroupReadWriteScopes);
+            var requestUrl = client.Groups[model.GroupId].Members.Request().RequestUrl + "/$ref";
+            return await ExecuteRequestAsync(client, requestUrl, model.GroupId, model.SelectedGroups);
+        }
+        #endregion
+
+        #region Private
+        private async Task<IActionResult> ExecuteRequestAsync(GraphServiceClient client, string requestUrl, string idGroup, IEnumerable<string> selectedMembers)
+        {
+            foreach (var memberId in selectedMembers)
             {
                 // Payload in json
-                string body = "{\"@odata.id\":\"https://graph.microsoft.com/v1.0/users/" + owner + "\"}";
+                string body = "{\"@odata.id\":\"https://graph.microsoft.com/v1.0/directoryObjects/" + memberId + "\"}";
 
                 // Create the request message and add the content.
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUrl);
@@ -208,18 +240,6 @@ namespace AspNetCore.MSGraphAPI.Controllers
                 // Send the request and get the response.
                 await client.HttpProvider.SendAsync(request);
             }
-
-            return RedirectToAction("Detail", new { id = model.GroupId });
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> RevokeOwner(string id, string idGroup)
-        {
-            GraphServiceClient client = _graphAuthProvider.GetAuthenticatedClient(UserId, _adminRestrictedGroupReadWriteScopes);
-            var requestUrl = client.Groups[idGroup].Owners[id].Request().RequestUrl + "/$ref";
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, requestUrl);
-            await client.AuthenticationProvider.AuthenticateRequestAsync(request);
-            await client.HttpProvider.SendAsync(request);
 
             return RedirectToAction("Detail", new { id = idGroup });
         }
