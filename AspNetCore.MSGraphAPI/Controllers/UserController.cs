@@ -33,6 +33,7 @@ namespace AspNetCore.MSGraphAPI.Controllers
                 var graphClient =  _graphAuthProvider.GetAuthenticatedClient(UserId, _azureOptions.GraphScopes.Split(' '));
                 var users = await graphClient.Users.Request().GetAsync();
 
+                ViewBag.TenantId = TenantId;
                 return View(users);
             }
             catch(MsalException)

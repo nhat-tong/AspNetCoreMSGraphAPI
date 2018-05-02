@@ -57,6 +57,7 @@ namespace AspNetCore.MSGraphAPI.Controllers
             }
 
             var groups = await client.Groups.Request().GetAsync();
+            ViewBag.TenantId = TenantId;
             return View(groups);
         }
 
