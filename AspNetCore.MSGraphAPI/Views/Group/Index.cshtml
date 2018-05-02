@@ -1,0 +1,32 @@
+﻿@model Microsoft.Graph.IGraphServiceGroupsCollectionPage
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Groups in current directory</h2>
+
+<table class="table table-responsive table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var group in Model.CurrentPage)
+    {
+            <tr>
+                <td>@group.Id</td>
+                <td>@group.DisplayName</td>
+                <td>@group.Description</td>
+                <td><a class="btn btn-primary" asp-action="Detail" asp-route-id="@group.Id">Detail</a>&nbsp;<a class="btn btn-danger" asp-action="DeleteGroup" asp-route-id="@group.Id">Delete</a></td>
+            </tr>
+    }
+    </tbody>
+</table>
+
+<a id="CreateNewGroup" class="btn btn-primary">Create new group</a>
+

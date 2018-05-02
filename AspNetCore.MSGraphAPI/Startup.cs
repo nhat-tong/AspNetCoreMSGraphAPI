@@ -43,9 +43,6 @@ namespace AspNetCore.MSGraphAPI
             services.AddMemoryCache();
 
             services.AddSingleton<IGraphAuthProvider, GraphAuthProvider>();
-
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IGraphSdkHelper, GraphSdkHelper>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

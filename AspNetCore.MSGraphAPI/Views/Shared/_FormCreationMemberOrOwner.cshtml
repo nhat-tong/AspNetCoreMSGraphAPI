@@ -1,0 +1,28 @@
+﻿@model CreateMemberOrOwnerViewModel
+
+<div id="groupModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Add a new @(Model.ActionName == "CreateMember" ? "member" : "owner")</h4>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="Group" asp-action="@Model.ActionName" method="post">
+                    <input asp-for="GroupId" type="hidden" />
+                    <div class="form-group">
+                        <label asp-for="SelectedItems"></label>
+                        <select asp-for="SelectedItems" asp-items="@Model.ListItem" class="form-control" multiple>
+                            <option selected disabled>Select an item</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Add</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>

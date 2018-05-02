@@ -4,12 +4,33 @@
     ViewData["Title"] = "Index";
 }
 
-<h2>List users in current directory</h2>
+<h2>Users in current directory</h2>
 
-<ul>
-    @foreach (var user in Model.CurrentPage)
+<table class="table table-responsive table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Display Name</th>
+            <th>Principal Name</th>
+            <th>Job Title</th>
+            <th>Department</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+         @foreach (var user in Model.CurrentPage)
     {
-        <li>@user.DisplayName, @user.Id</li>
+        <tr>
+            <td>@user.Id</td>
+            <td>@user.GivenName @user.Surname</td>
+            <td>@user.UserPrincipalName</td>
+            <td>@user.JobTitle</td>
+            <td>@user.Department</td>
+            <td><a class="btn btn-danger" asp-action="DeleteUser" asp-route-id="@user.Id">Delete</a></td>
+        </tr>
     }
-</ul>
+    </tbody>
+</table>
+
+<a id="CreateNewUser" class="btn btn-primary" data-toggle="collapse">Create a new user</a>
 

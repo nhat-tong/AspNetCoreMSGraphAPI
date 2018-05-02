@@ -19,5 +19,6 @@
         public string GraphResourceId { get; set; }
 
         public string GraphScopes { get; set; }
+        public string AdminConsentFormat { get; set; }
     }
 }

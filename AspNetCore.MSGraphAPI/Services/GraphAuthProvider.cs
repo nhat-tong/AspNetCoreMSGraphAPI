@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 #endregion
 
@@ -23,7 +24,7 @@ namespace AspNetCore.MSGraphAPI.Services
             _azureOptions = options.Value;
         }
 
-        public async Task<string> GetUserAccessTokenAsync(string userId)
+        public async Task<string> GetUserAccessTokenAsync(string userId, string[] scopes)
         {
             _userTokenCache = new MemoryTokenCache(userId, _memoryCache).GetCacheInstance();
 
@@ -34,25 +35,32 @@ namespace AspNetCore.MSGraphAPI.Services
                 _userTokenCache,
                 null);
 
-            if (!cca.Users.Any()) throw new ServiceException(new Error
-            {
-                Code = "TokenNotFound",
-                Message = "User not found in token cache. Maybe the server was restarted."
-            });
+            var result = await cca.AcquireTokenSilentAsync(scopes, cca.Users.FirstOrDefault());
+            return result.AccessToken;
+        }
 
-            try
-            {
-                var result = await cca.AcquireTokenSilentAsync(_azureOptions.GraphScopes.Split(new[] { ' ' }), cca.Users.First());
-                return result.AccessToken;
-            }
-            catch // Unable to retrieve the access token silently
-            {
-                throw new ServiceException(new Error
+        public GraphServiceClient GetAuthenticatedClient(string userId, string[] scopes)
+        {
+            return new GraphServiceClient(new DelegateAuthenticationProvider(
+                async request =>
                 {
-                    Code = GraphErrorCode.AuthenticationFailure.ToString(),
-                    Message = "Caller needs to authenticate. Unable to retrieve the access token silently."
-                });
-            }
+                    // Passing tenant ID to the sample auth provider to use as a cache key
+                    var accessToken = await GetUserAccessTokenAsync(userId, scopes);
+
+                    // Append the access token to the request
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                }));
+        }
+
+        public GraphServiceClient GetAuthenticatedClient(string accessToken)
+        {
+            return new GraphServiceClient(new DelegateAuthenticationProvider(
+                async request =>
+                {
+                    // Append the access token to the request
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                    await Task.FromResult(0);
+                }));
         }
     }
 }

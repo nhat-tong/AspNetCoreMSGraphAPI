@@ -1,0 +1,53 @@
+﻿@model CreateUserViewModel
+
+<div id="userModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Create a new user</h4>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="User" asp-action="CreateUser" method="post">
+                    <input asp-for="Domain" type="hidden" />
+                    <div class="form-group">
+                        <label asp-for="DisplayName"></label>
+                        <input asp-for="DisplayName" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="UserPrincipalName"></label>
+                        <div class="input-group">
+                            <input asp-for="UserPrincipalName" class="form-control" />
+                            <span class="input-group-addon">@@@Model.Domain</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Password"></label>
+                        <input type="password" asp-for="Password" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="FirstName"></label>
+                        <input asp-for="FirstName" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="LastName"></label>
+                        <input asp-for="LastName" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="JobTitle"></label>
+                        <input asp-for="JobTitle" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Department"></label>
+                        <input asp-for="Department" class="form-control" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Create</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>

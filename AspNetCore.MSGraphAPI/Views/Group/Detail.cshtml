@@ -1,0 +1,58 @@
+﻿@model Group
+@{
+    ViewData["Title"] = "Detail";
+}
+
+<h1>Current Group: @Model.DisplayName</h1>
+
+<h2>Owners</h2>
+
+<table class="table table-responsive table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (User owner in Model.Owners)
+        {
+            <tr>
+                <td>@owner.Id</td>
+                <td>@owner.DisplayName</td>
+                <td>@owner.UserPrincipalName</td>
+                <td><a asp-action="RevokeOwner" asp-route-id="@owner.Id" asp-route-idGroup="@Model.Id" class="btn btn-danger">Revoke</a></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a id="AddNewOwner" class="btn btn-primary" href="/Group/CreateOwner?id=@Model.Id">Add New Owner</a>
+
+<hr />
+
+<h2>Members</h2>
+
+<table class="table table-responsive table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (User member in Model.Members)
+        {
+        <tr>
+            <td>@member.Id</td>
+            <td>@member.DisplayName</td>
+            <td>@member.UserPrincipalName</td>
+            <td><a asp-action="RevokeMember" asp-route-id="@member.Id" asp-route-idGroup="@Model.Id" class="btn btn-danger">Revoke</a></td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+<a id="AddNewMember" class="btn btn-primary" href="/Group/CreateMember?id=@Model.Id">Add New Member</a>
